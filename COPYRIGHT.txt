@@ -310,6 +310,11 @@ Comment: OggVorbis
 Copyright: 2002, Xiph.org Foundation
 License: BSD-3-clause
 
+Files: ./thirdparty/libopus/
+Comment: OggOpus
+Copyright: 2001-2023, Xiph.org Foundation
+License: BSD-3-clause
+
 Files: ./thirdparty/libpng/
 Comment: libpng
 Copyright: 1995-2024, The PNG Reference Library Authors.

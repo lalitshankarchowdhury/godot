@@ -483,6 +483,16 @@ Files extracted from upstream source:
 - `include/ogg/*.h` in `ogg/` (run `configure` to generate `config_types.h`)
 - `COPYING`
 
+## libopus
+
+- Upstream: https://opus-codec.org/
+- Version: 1.5.2 (ddbe48383984d56acd9e1ab6a090c54ca6b735a6, 2024)
+- License: BSD-3-Clause
+
+Files extracted from upstream source:
+
+- `celt`, `silk`, `src`, and `include` folders
+- `COPYING`
 
 ## libpng
 
