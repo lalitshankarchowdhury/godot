@@ -602,7 +602,7 @@ bool EditorExportPlatformAndroid::_should_compress_asset(const String &p_path, c
 		// From https://github.com/android/platform_frameworks_base/blob/master/tools/aapt/Package.cpp
 		// These formats are already compressed, or don't compress well:
 		".jpg", ".jpeg", ".png", ".gif",
-		".wav", ".mp2", ".mp3", ".ogg", ".aac",
+		".wav", ".mp2", ".mp3", ".ogg", ".opus", ".aac",
 		".mpg", ".mpeg", ".mid", ".midi", ".smf", ".jet",
 		".rtttl", ".imy", ".xmf", ".mp4", ".m4a",
 		".m4v", ".3gp", ".3gpp", ".3g2", ".3gpp2",

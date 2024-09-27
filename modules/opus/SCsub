@@ -130,7 +130,7 @@ if env["builtin_libopus"]:
         "celt/vq.c",
     ]
 
-    thirdparty_inc_dirs = [thirdparty_dir + dir for dir in ["include/", "celt/", "silk/", "silk/float/"]]
+    thirdparty_inc_dirs = [thirdparty_dir + dir for dir in ["opus/", "celt/", "silk/", "silk/float/"]]
     thirdparty_sources = [thirdparty_dir + file for file in thirdparty_sources]
 
     env_opus.Prepend(CPPPATH=[thirdparty_dir, *thirdparty_inc_dirs])

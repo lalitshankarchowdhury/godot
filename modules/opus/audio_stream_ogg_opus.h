@@ -28,17 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef AUDIO_STREAM_OGG_VORBIS_H
-#define AUDIO_STREAM_OGG_VORBIS_H
+#ifndef AUDIO_STREAM_OGG_OPUS_H
+#define AUDIO_STREAM_OGG_OPUS_H
 
 #include "core/variant/variant.h"
 #include "modules/ogg/ogg_packet_sequence.h"
 #include "servers/audio/audio_stream.h"
 
-class AudioStreamOggVorbis;
+class AudioStreamOggOpus;
 
-class AudioStreamPlaybackOggVorbis : public AudioStreamPlaybackResampled {
-	GDCLASS(AudioStreamPlaybackOggVorbis, AudioStreamPlaybackResampled);
+class AudioStreamPlaybackOggOpus : public AudioStreamPlaybackResampled {
+	GDCLASS(AudioStreamPlaybackOggOpus, AudioStreamPlaybackResampled);
 
 	uint32_t frames_mixed = 0;
 	bool active = false;
@@ -52,11 +52,6 @@ class AudioStreamPlaybackOggVorbis : public AudioStreamPlaybackResampled {
 	AudioFrame loop_fade[FADE_SIZE];
 	int loop_fade_remaining = FADE_SIZE;
 
-	// vorbis_info info;
-	// vorbis_comment comment;
-	// vorbis_dsp_state dsp_state;
-	// vorbis_block block;
-
 	bool info_is_allocated = false;
 	bool comment_is_allocated = false;
 	bool dsp_state_is_allocated = false;
@@ -67,20 +62,21 @@ class AudioStreamPlaybackOggVorbis : public AudioStreamPlaybackResampled {
 	bool have_samples_left = false;
 	bool have_packets_left = false;
 
-	friend class AudioStreamOggVorbis;
+	friend class AudioStreamOggOpus;
 
-	Ref<OggPacketSequence> vorbis_data;
-	Ref<OggPacketSequencePlayback> vorbis_data_playback;
-	Ref<AudioStreamOggVorbis> vorbis_stream;
+	Ref<OggPacketSequence> opus_data;
+	Ref<OggPacketSequencePlayback> opus_data_playback;
+	Ref<AudioStreamOggOpus> opus_stream;
+	Vector<uint8_t> opus_packet_seq;
 
 	bool _is_sample = false;
 	Ref<AudioSamplePlayback> sample_playback;
 
 	int _mix_frames(AudioFrame *p_buffer, int p_frames);
-	int _mix_frames_vorbis(AudioFrame *p_buffer, int p_frames);
+	int _mix_frames_opus(AudioFrame *p_buffer, int p_frames);
 
-	// Allocates vorbis data structures. Returns true upon success, false on failure.
-	bool _alloc_vorbis();
+	// Allocates Opus data structures. Returns true upon success, false on failure.
+	bool _alloc_opus();
 
 protected:
 	virtual int _mix_internal(AudioFrame *p_buffer, int p_frames) override;
@@ -106,16 +102,16 @@ public:
 	virtual Ref<AudioSamplePlayback> get_sample_playback() const override;
 	virtual void set_sample_playback(const Ref<AudioSamplePlayback> &p_playback) override;
 
-	AudioStreamPlaybackOggVorbis() {}
-	~AudioStreamPlaybackOggVorbis();
+	AudioStreamPlaybackOggOpus() {}
+	~AudioStreamPlaybackOggOpus();
 };
 
-class AudioStreamOggVorbis : public AudioStream {
-	GDCLASS(AudioStreamOggVorbis, AudioStream);
+class AudioStreamOggOpus : public AudioStream {
+	GDCLASS(AudioStreamOggOpus, AudioStream);
 	OBJ_SAVE_TYPE(AudioStream); // Saves derived classes with common type so they can be interchanged.
-	RES_BASE_EXTENSION("oggvorbisstr");
+	RES_BASE_EXTENSION("oggopusstr");
 
-	friend class AudioStreamPlaybackOggVorbis;
+	friend class AudioStreamPlaybackOggOpus;
 
 	int channels = 1;
 	double length = 0.0;
@@ -136,8 +132,8 @@ protected:
 	static void _bind_methods();
 
 public:
-	static Ref<AudioStreamOggVorbis> load_from_file(const String &p_path);
-	static Ref<AudioStreamOggVorbis> load_from_buffer(const Vector<uint8_t> &file_data);
+	static Ref<AudioStreamOggOpus> load_from_file(const String &p_path);
+	static Ref<AudioStreamOggOpus> load_from_buffer(const Vector<uint8_t> &file_data);
 	void set_loop(bool p_enable);
 	virtual bool has_loop() const override;
 
@@ -170,8 +166,8 @@ public:
 	}
 	virtual Ref<AudioSample> generate_sample() const override;
 
-	AudioStreamOggVorbis();
-	virtual ~AudioStreamOggVorbis();
+	AudioStreamOggOpus();
+	virtual ~AudioStreamOggOpus();
 };
 
-#endif // AUDIO_STREAM_OGG_VORBIS_H
+#endif // AUDIO_STREAM_OGG_OPUS_H

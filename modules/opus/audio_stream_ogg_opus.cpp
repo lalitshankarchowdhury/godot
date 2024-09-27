@@ -36,7 +36,7 @@
 #include "modules/opus/resource_importer_ogg_opus.h"
 #include <ogg/ogg.h>
 
-int AudioStreamPlaybackOggVorbis::_mix_internal(AudioFrame *p_buffer, int p_frames) {
+int AudioStreamPlaybackOggOpus::_mix_internal(AudioFrame *p_buffer, int p_frames) {
 	ERR_FAIL_COND_V(!ready, 0);
 
 	if (!active) {
@@ -46,10 +46,10 @@ int AudioStreamPlaybackOggVorbis::_mix_internal(AudioFrame *p_buffer, int p_fram
 	int todo = p_frames;
 
 	int beat_length_frames = -1;
-	bool use_loop = looping_override ? looping : vorbis_stream->loop;
+	bool use_loop = looping_override ? looping : opus_stream->loop;
 
-	if (use_loop && vorbis_stream->get_bpm() > 0 && vorbis_stream->get_beat_count() > 0) {
-		beat_length_frames = vorbis_stream->get_beat_count() * vorbis_data->get_sampling_rate() * 60 / vorbis_stream->get_bpm();
+	if (use_loop && opus_stream->get_bpm() > 0 && opus_stream->get_beat_count() > 0) {
+		beat_length_frames = opus_stream->get_beat_count() * opus_data->get_sampling_rate() * 60 / opus_stream->get_bpm();
 	}
 
 	while (todo > 0 && active) {
@@ -61,7 +61,7 @@ int AudioStreamPlaybackOggVorbis::_mix_internal(AudioFrame *p_buffer, int p_fram
 			to_mix = MAX(0, beat_length_frames - (int)frames_mixed);
 		}
 
-		int mixed = _mix_frames_vorbis(buffer, to_mix);
+		int mixed = _mix_frames_opus(buffer, to_mix);
 		ERR_FAIL_COND_V(mixed < 0, 0);
 		todo -= mixed;
 		frames_mixed += mixed;
@@ -107,7 +107,7 @@ int AudioStreamPlaybackOggVorbis::_mix_internal(AudioFrame *p_buffer, int p_fram
 					loop_fade_remaining = FADE_SIZE;
 				} else {
 					// Add some loop fade;
-					int faded_mix = _mix_frames_vorbis(loop_fade, FADE_SIZE);
+					int faded_mix = _mix_frames_opus(loop_fade, FADE_SIZE);
 
 					for (int i = faded_mix; i < FADE_SIZE; i++) {
 						// In case lesss was mixed, pad with zeros
@@ -116,7 +116,7 @@ int AudioStreamPlaybackOggVorbis::_mix_internal(AudioFrame *p_buffer, int p_fram
 					loop_fade_remaining = 0;
 				}
 
-				seek(vorbis_stream->loop_offset);
+				seek(opus_stream->loop_offset);
 				loops++;
 				// We still have buffer to fill, start from this element in the next iteration.
 				continue;
@@ -125,11 +125,11 @@ int AudioStreamPlaybackOggVorbis::_mix_internal(AudioFrame *p_buffer, int p_fram
 
 		if (!have_packets_left && !have_samples_left) {
 			// Actual end of file!
-			bool is_not_empty = mixed > 0 || vorbis_stream->get_length() > 0;
+			bool is_not_empty = mixed > 0 || opus_stream->get_length() > 0;
 			if (use_loop && is_not_empty) {
 				//loop
 
-				seek(vorbis_stream->loop_offset);
+				seek(opus_stream->loop_offset);
 				loops++;
 				// We still have buffer to fill, start from this element in the next iteration.
 
@@ -144,17 +144,17 @@ int AudioStreamPlaybackOggVorbis::_mix_internal(AudioFrame *p_buffer, int p_fram
 	return p_frames - todo;
 }
 
-int AudioStreamPlaybackOggVorbis::_mix_frames_vorbis(AudioFrame *p_buffer, int p_frames) {
+int AudioStreamPlaybackOggOpus::_mix_frames_opus(AudioFrame *p_buffer, int p_frames) {
 }
 
-float AudioStreamPlaybackOggVorbis::get_stream_sampling_rate() {
-	return vorbis_data->get_sampling_rate();
+float AudioStreamPlaybackOggOpus::get_stream_sampling_rate() {
+	return opus_data->get_sampling_rate();
 }
 
-bool AudioStreamPlaybackOggVorbis::_alloc_vorbis() {
+bool AudioStreamPlaybackOggOpus::_alloc_opus() {
 }
 
-void AudioStreamPlaybackOggVorbis::start(double p_from_pos) {
+void AudioStreamPlaybackOggOpus::start(double p_from_pos) {
 	ERR_FAIL_COND(!ready);
 	loop_fade_remaining = FADE_SIZE;
 	active = true;
@@ -163,27 +163,27 @@ void AudioStreamPlaybackOggVorbis::start(double p_from_pos) {
 	begin_resample();
 }
 
-void AudioStreamPlaybackOggVorbis::stop() {
+void AudioStreamPlaybackOggOpus::stop() {
 	active = false;
 }
 
-bool AudioStreamPlaybackOggVorbis::is_playing() const {
+bool AudioStreamPlaybackOggOpus::is_playing() const {
 	return active;
 }
 
-int AudioStreamPlaybackOggVorbis::get_loop_count() const {
+int AudioStreamPlaybackOggOpus::get_loop_count() const {
 	return loops;
 }
 
-double AudioStreamPlaybackOggVorbis::get_playback_position() const {
-	return double(frames_mixed) / (double)vorbis_data->get_sampling_rate();
+double AudioStreamPlaybackOggOpus::get_playback_position() const {
+	return double(frames_mixed) / (double)opus_data->get_sampling_rate();
 }
 
-void AudioStreamPlaybackOggVorbis::tag_used_streams() {
-	vorbis_stream->tag_used(get_playback_position());
+void AudioStreamPlaybackOggOpus::tag_used_streams() {
+	opus_stream->tag_used(get_playback_position());
 }
 
-void AudioStreamPlaybackOggVorbis::set_parameter(const StringName &p_name, const Variant &p_value) {
+void AudioStreamPlaybackOggOpus::set_parameter(const StringName &p_name, const Variant &p_value) {
 	if (p_name == SNAME("looping")) {
 		if (p_value == Variant()) {
 			looping_override = false;
@@ -195,134 +195,134 @@ void AudioStreamPlaybackOggVorbis::set_parameter(const StringName &p_name, const
 	}
 }
 
-Variant AudioStreamPlaybackOggVorbis::get_parameter(const StringName &p_name) const {
+Variant AudioStreamPlaybackOggOpus::get_parameter(const StringName &p_name) const {
 	if (looping_override && p_name == SNAME("looping")) {
 		return looping;
 	}
 	return Variant();
 }
 
-void AudioStreamPlaybackOggVorbis::seek(double p_time) {
+void AudioStreamPlaybackOggOpus::seek(double p_time) {
 }
 
-void AudioStreamPlaybackOggVorbis::set_is_sample(bool p_is_sample) {
+void AudioStreamPlaybackOggOpus::set_is_sample(bool p_is_sample) {
 	_is_sample = p_is_sample;
 }
 
-bool AudioStreamPlaybackOggVorbis::get_is_sample() const {
+bool AudioStreamPlaybackOggOpus::get_is_sample() const {
 	return _is_sample;
 }
 
-Ref<AudioSamplePlayback> AudioStreamPlaybackOggVorbis::get_sample_playback() const {
+Ref<AudioSamplePlayback> AudioStreamPlaybackOggOpus::get_sample_playback() const {
 	return sample_playback;
 }
 
-void AudioStreamPlaybackOggVorbis::set_sample_playback(const Ref<AudioSamplePlayback> &p_playback) {
+void AudioStreamPlaybackOggOpus::set_sample_playback(const Ref<AudioSamplePlayback> &p_playback) {
 	sample_playback = p_playback;
 	if (sample_playback.is_valid()) {
 		sample_playback->stream_playback = Ref<AudioStreamPlayback>(this);
 	}
 }
 
-AudioStreamPlaybackOggVorbis::~AudioStreamPlaybackOggVorbis() {
+AudioStreamPlaybackOggOpus::~AudioStreamPlaybackOggOpus() {
 }
 
-Ref<AudioStreamPlayback> AudioStreamOggVorbis::instantiate_playback() {
-	Ref<AudioStreamPlaybackOggVorbis> ovs;
+Ref<AudioStreamPlayback> AudioStreamOggOpus::instantiate_playback() {
+	Ref<AudioStreamPlaybackOggOpus> ovs;
 
 	ERR_FAIL_COND_V(packet_sequence.is_null(), nullptr);
 
 	ovs.instantiate();
-	ovs->vorbis_stream = Ref<AudioStreamOggVorbis>(this);
-	ovs->vorbis_data = packet_sequence;
+	ovs->opus_stream = Ref<AudioStreamOggOpus>(this);
+	ovs->opus_data = packet_sequence;
 	ovs->frames_mixed = 0;
 	ovs->active = false;
 	ovs->loops = 0;
-	if (ovs->_alloc_vorbis()) {
+	if (ovs->_alloc_opus()) {
 		return ovs;
 	}
 	// Failed to allocate data structures.
 	return nullptr;
 }
 
-String AudioStreamOggVorbis::get_stream_name() const {
+String AudioStreamOggOpus::get_stream_name() const {
 	return ""; //return stream_name;
 }
 
-void AudioStreamOggVorbis::maybe_update_info() {
+void AudioStreamOggOpus::maybe_update_info() {
 }
 
-void AudioStreamOggVorbis::set_packet_sequence(Ref<OggPacketSequence> p_packet_sequence) {
+void AudioStreamOggOpus::set_packet_sequence(Ref<OggPacketSequence> p_packet_sequence) {
 	packet_sequence = p_packet_sequence;
 	if (packet_sequence.is_valid()) {
 		maybe_update_info();
 	}
 }
 
-Ref<OggPacketSequence> AudioStreamOggVorbis::get_packet_sequence() const {
+Ref<OggPacketSequence> AudioStreamOggOpus::get_packet_sequence() const {
 	return packet_sequence;
 }
 
-void AudioStreamOggVorbis::set_loop(bool p_enable) {
+void AudioStreamOggOpus::set_loop(bool p_enable) {
 	loop = p_enable;
 }
 
-bool AudioStreamOggVorbis::has_loop() const {
+bool AudioStreamOggOpus::has_loop() const {
 	return loop;
 }
 
-void AudioStreamOggVorbis::set_loop_offset(double p_seconds) {
+void AudioStreamOggOpus::set_loop_offset(double p_seconds) {
 	loop_offset = p_seconds;
 }
 
-double AudioStreamOggVorbis::get_loop_offset() const {
+double AudioStreamOggOpus::get_loop_offset() const {
 	return loop_offset;
 }
 
-double AudioStreamOggVorbis::get_length() const {
+double AudioStreamOggOpus::get_length() const {
 	ERR_FAIL_COND_V(packet_sequence.is_null(), 0);
 	return packet_sequence->get_length();
 }
 
-void AudioStreamOggVorbis::set_bpm(double p_bpm) {
+void AudioStreamOggOpus::set_bpm(double p_bpm) {
 	ERR_FAIL_COND(p_bpm < 0);
 	bpm = p_bpm;
 	emit_changed();
 }
 
-double AudioStreamOggVorbis::get_bpm() const {
+double AudioStreamOggOpus::get_bpm() const {
 	return bpm;
 }
 
-void AudioStreamOggVorbis::set_beat_count(int p_beat_count) {
+void AudioStreamOggOpus::set_beat_count(int p_beat_count) {
 	ERR_FAIL_COND(p_beat_count < 0);
 	beat_count = p_beat_count;
 	emit_changed();
 }
 
-int AudioStreamOggVorbis::get_beat_count() const {
+int AudioStreamOggOpus::get_beat_count() const {
 	return beat_count;
 }
 
-void AudioStreamOggVorbis::set_bar_beats(int p_bar_beats) {
+void AudioStreamOggOpus::set_bar_beats(int p_bar_beats) {
 	ERR_FAIL_COND(p_bar_beats < 2);
 	bar_beats = p_bar_beats;
 	emit_changed();
 }
 
-int AudioStreamOggVorbis::get_bar_beats() const {
+int AudioStreamOggOpus::get_bar_beats() const {
 	return bar_beats;
 }
 
-bool AudioStreamOggVorbis::is_monophonic() const {
+bool AudioStreamOggOpus::is_monophonic() const {
 	return false;
 }
 
-void AudioStreamOggVorbis::get_parameter_list(List<Parameter> *r_parameters) {
+void AudioStreamOggOpus::get_parameter_list(List<Parameter> *r_parameters) {
 	r_parameters->push_back(Parameter(PropertyInfo(Variant::BOOL, "looping", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE), Variant()));
 }
 
-Ref<AudioSample> AudioStreamOggVorbis::generate_sample() const {
+Ref<AudioSample> AudioStreamOggOpus::generate_sample() const {
 	Ref<AudioSample> sample;
 	sample.instantiate();
 	sample->stream = this;
@@ -334,27 +334,27 @@ Ref<AudioSample> AudioStreamOggVorbis::generate_sample() const {
 	return sample;
 }
 
-void AudioStreamOggVorbis::_bind_methods() {
-	ClassDB::bind_static_method("AudioStreamOggVorbis", D_METHOD("load_from_buffer", "buffer"), &AudioStreamOggVorbis::load_from_buffer);
-	ClassDB::bind_static_method("AudioStreamOggVorbis", D_METHOD("load_from_file", "path"), &AudioStreamOggVorbis::load_from_file);
+void AudioStreamOggOpus::_bind_methods() {
+	ClassDB::bind_static_method("AudioStreamOggOpus", D_METHOD("load_from_buffer", "buffer"), &AudioStreamOggOpus::load_from_buffer);
+	ClassDB::bind_static_method("AudioStreamOggOpus", D_METHOD("load_from_file", "path"), &AudioStreamOggOpus::load_from_file);
 
-	ClassDB::bind_method(D_METHOD("set_packet_sequence", "packet_sequence"), &AudioStreamOggVorbis::set_packet_sequence);
-	ClassDB::bind_method(D_METHOD("get_packet_sequence"), &AudioStreamOggVorbis::get_packet_sequence);
+	ClassDB::bind_method(D_METHOD("set_packet_sequence", "packet_sequence"), &AudioStreamOggOpus::set_packet_sequence);
+	ClassDB::bind_method(D_METHOD("get_packet_sequence"), &AudioStreamOggOpus::get_packet_sequence);
 
-	ClassDB::bind_method(D_METHOD("set_loop", "enable"), &AudioStreamOggVorbis::set_loop);
-	ClassDB::bind_method(D_METHOD("has_loop"), &AudioStreamOggVorbis::has_loop);
+	ClassDB::bind_method(D_METHOD("set_loop", "enable"), &AudioStreamOggOpus::set_loop);
+	ClassDB::bind_method(D_METHOD("has_loop"), &AudioStreamOggOpus::has_loop);
 
-	ClassDB::bind_method(D_METHOD("set_loop_offset", "seconds"), &AudioStreamOggVorbis::set_loop_offset);
-	ClassDB::bind_method(D_METHOD("get_loop_offset"), &AudioStreamOggVorbis::get_loop_offset);
+	ClassDB::bind_method(D_METHOD("set_loop_offset", "seconds"), &AudioStreamOggOpus::set_loop_offset);
+	ClassDB::bind_method(D_METHOD("get_loop_offset"), &AudioStreamOggOpus::get_loop_offset);
 
-	ClassDB::bind_method(D_METHOD("set_bpm", "bpm"), &AudioStreamOggVorbis::set_bpm);
-	ClassDB::bind_method(D_METHOD("get_bpm"), &AudioStreamOggVorbis::get_bpm);
+	ClassDB::bind_method(D_METHOD("set_bpm", "bpm"), &AudioStreamOggOpus::set_bpm);
+	ClassDB::bind_method(D_METHOD("get_bpm"), &AudioStreamOggOpus::get_bpm);
 
-	ClassDB::bind_method(D_METHOD("set_beat_count", "count"), &AudioStreamOggVorbis::set_beat_count);
-	ClassDB::bind_method(D_METHOD("get_beat_count"), &AudioStreamOggVorbis::get_beat_count);
+	ClassDB::bind_method(D_METHOD("set_beat_count", "count"), &AudioStreamOggOpus::set_beat_count);
+	ClassDB::bind_method(D_METHOD("get_beat_count"), &AudioStreamOggOpus::get_beat_count);
 
-	ClassDB::bind_method(D_METHOD("set_bar_beats", "count"), &AudioStreamOggVorbis::set_bar_beats);
-	ClassDB::bind_method(D_METHOD("get_bar_beats"), &AudioStreamOggVorbis::get_bar_beats);
+	ClassDB::bind_method(D_METHOD("set_bar_beats", "count"), &AudioStreamOggOpus::set_bar_beats);
+	ClassDB::bind_method(D_METHOD("get_bar_beats"), &AudioStreamOggOpus::get_bar_beats);
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "packet_sequence", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_packet_sequence", "get_packet_sequence");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bpm", PROPERTY_HINT_RANGE, "0,400,0.01,or_greater"), "set_bpm", "get_bpm");
@@ -364,14 +364,14 @@ void AudioStreamOggVorbis::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "loop_offset"), "set_loop_offset", "get_loop_offset");
 }
 
-AudioStreamOggVorbis::AudioStreamOggVorbis() {}
+AudioStreamOggOpus::AudioStreamOggOpus() {}
 
-AudioStreamOggVorbis::~AudioStreamOggVorbis() {}
+AudioStreamOggOpus::~AudioStreamOggOpus() {}
 
-Ref<AudioStreamOggVorbis> AudioStreamOggVorbis::load_from_buffer(const Vector<uint8_t> &file_data) {
-	return ResourceImporterOggVorbis::load_from_buffer(file_data);
+Ref<AudioStreamOggOpus> AudioStreamOggOpus::load_from_buffer(const Vector<uint8_t> &file_data) {
+	return ResourceImporterOggOpus::load_from_buffer(file_data);
 }
 
-Ref<AudioStreamOggVorbis> AudioStreamOggVorbis::load_from_file(const String &p_path) {
-	return ResourceImporterOggVorbis::load_from_file(p_path);
+Ref<AudioStreamOggOpus> AudioStreamOggOpus::load_from_file(const String &p_path) {
+	return ResourceImporterOggOpus::load_from_file(p_path);
 }

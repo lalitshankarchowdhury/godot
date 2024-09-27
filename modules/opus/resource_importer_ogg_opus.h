@@ -28,19 +28,25 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef RESOURCE_IMPORTER_OGG_VORBIS_H
-#define RESOURCE_IMPORTER_OGG_VORBIS_H
+#ifndef RESOURCE_IMPORTER_OGG_OPUS_H
+#define RESOURCE_IMPORTER_OGG_OPUS_H
 
 #include "audio_stream_ogg_opus.h"
 
 #include "core/io/resource_importer.h"
 
-class ResourceImporterOggVorbis : public ResourceImporter {
-	GDCLASS(ResourceImporterOggVorbis, ResourceImporter);
+class ResourceImporterOggOpus : public ResourceImporter {
+	GDCLASS(ResourceImporterOggOpus, ResourceImporter);
 
 	enum {
 		OGG_SYNC_BUFFER_SIZE = 8192,
 	};
+
+	static const int CHANNELS = 2;
+	static const int SAMPLE_RATE = 48000;
+	static const int MIN_FRAME_SIZE = (SAMPLE_RATE * CHANNELS) / 100; // 2.5ms of data at 48KHz stereo
+	static const int FRAME_SIZE = (SAMPLE_RATE * CHANNELS) / 100; // 10ms of data at 48KHz stereo
+	static const int MAX_FRAME_SIZE = 6 * FRAME_SIZE;
 
 protected:
 	static void _bind_methods();
@@ -51,8 +57,8 @@ public:
 	virtual void show_advanced_options(const String &p_path) override;
 #endif
 
-	static Ref<AudioStreamOggVorbis> load_from_file(const String &p_path);
-	static Ref<AudioStreamOggVorbis> load_from_buffer(const Vector<uint8_t> &file_data);
+	static Ref<AudioStreamOggOpus> load_from_file(const String &p_path);
+	static Ref<AudioStreamOggOpus> load_from_buffer(const Vector<uint8_t> &file_data);
 	virtual void get_recognized_extensions(List<String> *p_extensions) const override;
 	virtual String get_save_extension() const override;
 	virtual String get_resource_type() const override;
@@ -65,7 +71,7 @@ public:
 
 	virtual Error import(const String &p_source_file, const String &p_save_path, const HashMap<StringName, Variant> &p_options, List<String> *r_platform_variants, List<String> *r_gen_files = nullptr, Variant *r_metadata = nullptr) override;
 
-	ResourceImporterOggVorbis();
+	ResourceImporterOggOpus();
 };
 
-#endif // RESOURCE_IMPORTER_OGG_VORBIS_H
+#endif // RESOURCE_IMPORTER_OGG_OPUS_H

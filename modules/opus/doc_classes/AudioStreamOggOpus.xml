@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="AudioStreamOggVorbis" inherits="AudioStream" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="AudioStreamOggOpus" inherits="AudioStream" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		A class representing an Ogg Vorbis audio stream.
+		A class representing an Ogg Opus audio stream.
 	</brief_description>
 	<description>
-		The AudioStreamOggVorbis class is a specialized [AudioStream] for handling Ogg Vorbis file formats. It offers functionality for loading and playing back Ogg Vorbis files, as well as managing looping and other playback properties. This class is part of the audio stream system, which also supports WAV files through the [AudioStreamWAV] class.
+		The AudioStreamOggOpus class is a specialized [AudioStream] for handling Ogg Opus file formats. It offers functionality for loading and playing back Ogg Opus files, as well as managing looping and other playback properties. This class is part of the audio stream system, which also supports WAV files through the [AudioStreamWAV] class.
 	</description>
 	<tutorials>
 		<link title="Runtime file loading and saving">$DOCS_URL/tutorials/io/runtime_file_loading_and_saving.html</link>
 	</tutorials>
 	<methods>
 		<method name="load_from_buffer" qualifiers="static">
-			<return type="AudioStreamOggVorbis" />
+			<return type="AudioStreamOggOpus" />
 			<param index="0" name="buffer" type="PackedByteArray" />
 			<description>
-				Creates a new AudioStreamOggVorbis instance from the given buffer. The buffer must contain Ogg Vorbis data.
+				Creates a new AudioStreamOggOpus instance from the given buffer. The buffer must contain Ogg Opus data.
 			</description>
 		</method>
 		<method name="load_from_file" qualifiers="static">
-			<return type="AudioStreamOggVorbis" />
+			<return type="AudioStreamOggOpus" />
 			<param index="0" name="path" type="String" />
 			<description>
-				Creates a new AudioStreamOggVorbis instance from the given file path. The file must be in Ogg Vorbis format.
+				Creates a new AudioStreamOggOpus instance from the given file path. The file must be in Ogg Opus format.
 			</description>
 		</method>
 	</methods>
